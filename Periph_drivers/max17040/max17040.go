@@ -1,4 +1,3 @@
-// Copyright 2018 The Periph Authors. All rights reserved.
 // Use of this source code is governed under the Apache License, Version 2.0
 // that can be found in the LICENSE file.
 
@@ -42,7 +41,7 @@ const (
 
 )
 
-var data = []byte{0, 0} // data is used to capture received I2C data.
+var data = []byte{0, 0} // data is used to format I2C sent/received data frames.
 
 // Opts holds the configuration options.
 type Opts struct {
@@ -85,6 +84,10 @@ func NewMAX17040(busI2C i2c.Bus, opts *Opts) (*Dev, error) {
 
 // Reset function performs a reset similar to a power cycle.
 func (d *Dev) Reset() (err error) {
+	// Lock device to inhibit attempts at multiple simultaneous read/writes.
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
 	bufReset := make([]byte, 2)
 	binary.BigEndian.PutUint16(bufReset, DefaultOpts.Command) // Encode Reset command
 	bufReset = append([]byte{Command}, bufReset...)           // Prepend bufReset slice with the Command register address
@@ -111,7 +114,7 @@ func (d *Dev) SetRCOMP(rcompVal int) (err error) {
 
 	bufRcomp := make([]byte, 2)
 	binary.BigEndian.PutUint16(bufRcomp, uint16(rcompVal)) // Encode Reset command
-	bufRcomp = append([]byte{RComp}, bufRcomp...)          // Prepend bufReset slice with the Command register address
+	bufRcomp = append([]byte{RComp}, bufRcomp...)          // Prepend bufReset slice with the RCOMP register address
 
 	if err := d.c.Tx(bufRcomp, nil); err != nil {
 		fmt.Printf("failed to update R-Compensation for "+d.name+". %v\n", err)
@@ -179,7 +182,7 @@ func (d *Dev) ReadCellVoltage() (voltage physic.ElectricPotential, err error) {
 	}
 
 	// Calculate DC voltage.
-	// (1250 000 coefficient is 1.25mV per unit value x 10^6 nV).
+	// (1 250 000 coefficient is 1.25mV per unit value x 10^6 nV).
 	voltage = (physic.ElectricPotential(data[0])<<4 | physic.ElectricPotential(data[1])>>4) * 1250000
 
 	// Provide some boundary (sanity) checks on voltage read.
@@ -190,7 +193,7 @@ func (d *Dev) ReadCellVoltage() (voltage physic.ElectricPotential, err error) {
 	return voltage, nil
 }
 
-// ReadSoC() reads State of Charge (Percentage)
+// ReadSoC() reads State of Charge (Returns high accuracy result)
 func (d *Dev) ReadSoC() (SOCpercent float32, err error) {
 	// Lock device to inhibit attempts at multiple simultaneous read/writes.
 	d.mu.Lock()
@@ -205,6 +208,26 @@ func (d *Dev) ReadSoC() (SOCpercent float32, err error) {
 
 	// Provide some boundary (sanity) checks on SoC read
 	if (SOCpercent > 100) || (SOCpercent < 0) {
+		err = errors.New("failed to read State of Charge from " + d.name)
+		return 0, err
+	}
+	return SOCpercent, nil
+}
+
+// ReadSoC() reads State of Charge (Returns Integer result only)
+func (d *Dev) ReadSoCint() (SOCpercent uint8, err error) {
+	// Lock device to inhibit attempts at multiple simultaneous read/writes.
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	// Specify SoC (State of Charge) register to be read from the device.
+	if err := d.c.Tx([]byte{SoC}, data); err != nil {
+		return 0, err
+	}
+	SOCpercent = uint8(data[0]) // Acquire Integer result for State of Charge %
+
+	// Provide some boundary (sanity) checks on SoC read
+	if SOCpercent > 100 {
 		err = errors.New("failed to read State of Charge from " + d.name)
 		return 0, err
 	}
