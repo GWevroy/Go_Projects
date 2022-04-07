@@ -38,7 +38,6 @@ const (
 	QuickStart uint16 = 0x4000 // QuickStart is the default (Quick-Start) value used for the Mode Register.
 	RcompCal   uint16 = 0x9700 // RcompCal is the default calibration value for the RCOMP Register.
 	CMDpor     uint16 = 0x0054 // CMDpor is the default (Power On Reset) command value for the Command Register.
-
 )
 
 var data = []byte{0, 0} // data is used to format I2C sent/received data frames.
@@ -193,7 +192,7 @@ func (d *Dev) ReadCellVoltage() (voltage physic.ElectricPotential, err error) {
 	return voltage, nil
 }
 
-// ReadSoC() reads State of Charge (Returns high accuracy result)
+// ReadSoC() reads State of Charge (Returns Percentage)
 func (d *Dev) ReadSoC() (SOCpercent float32, err error) {
 	// Lock device to inhibit attempts at multiple simultaneous read/writes.
 	d.mu.Lock()
@@ -208,26 +207,6 @@ func (d *Dev) ReadSoC() (SOCpercent float32, err error) {
 
 	// Provide some boundary (sanity) checks on SoC read
 	if (SOCpercent > 100) || (SOCpercent < 0) {
-		err = errors.New("failed to read State of Charge from " + d.name)
-		return 0, err
-	}
-	return SOCpercent, nil
-}
-
-// ReadSoC() reads State of Charge (Returns Integer result only)
-func (d *Dev) ReadSoCint() (SOCpercent uint8, err error) {
-	// Lock device to inhibit attempts at multiple simultaneous read/writes.
-	d.mu.Lock()
-	defer d.mu.Unlock()
-
-	// Specify SoC (State of Charge) register to be read from the device.
-	if err := d.c.Tx([]byte{SoC}, data); err != nil {
-		return 0, err
-	}
-	SOCpercent = uint8(data[0]) // Acquire Integer result for State of Charge %
-
-	// Provide some boundary (sanity) checks on SoC read
-	if SOCpercent > 100 {
 		err = errors.New("failed to read State of Charge from " + d.name)
 		return 0, err
 	}
