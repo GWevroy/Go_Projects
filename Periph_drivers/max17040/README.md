@@ -1,31 +1,11 @@
 ---
-title: "Habits"
-output:
-  pdf_document:
-    path: home/graham/Documents/Temp/Habits.pdf
+title: "MAX17040 Driver"
 ---
 
-# My first Markdown page
-
+## MAX17040 Device Driver
 ## by Graham Ward
 
-```mermaid  align="center"
-graph TD;
-    A-->B;
-    A--> Cat_in_the_hat;
-    B-->D;
-    Cat_in_the_hat-->D;
-    E-->D;
-    A-->F;
-```
 
-$$ c^2 + {d^{23}/23-f^{16}} $$
-
-$$ a^2 = b^2 + c^2 $$
-
-$$ \sum_{i=1}^{10} t_i $$
-
-**and what about this?**
 
 ```wavedrom
 {signal: [
