@@ -1,9 +1,9 @@
-package example_test.go
+package max17040_test
 
 import (
 	"fmt"
 
-	"main.go/devices/max17040" // Update with alternative resource location "periph.io/x/devices/v3/max17040"
+	"main.go/max17040" // Update with alternative resource location
 
 	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/host/v3"
@@ -42,7 +42,7 @@ func main() {
 		fmt.Printf("formatted number = %.2f Volts\n", num)
 	}
 
-	// Get Cell State of Charge (Percentage).
+	// Get Cell State of Charge (Precision Percentage).
 	upsSoC, err := PSUcomms.ReadSoC()
 	if err != nil {
 		fmt.Println(err)
@@ -51,12 +51,19 @@ func main() {
 		fmt.Printf("Cell State of Charge: %.3f%%\n", upsSoC)
 	}
 
-	// Retrieve device version number
 	version, err := PSUcomms.GetVersion()
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Printf("Version of this MAX17040: %v\n", version)
+	}
+
+	// Initiate Quickstart Mode (clears algorithm to same state as a power up)
+	err = PSUcomms.QuickStart()
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Device has entered Quickstart Mode")
 	}
 
 	// Verify RCOMP is default value (0x9700 or 38656 decimal).
@@ -84,7 +91,6 @@ func main() {
 		fmt.Printf("%v RCOMP calibration value = %v\n", PSUcomms.String(), compensation)
 	}
 
-	// Reset MAX17040 device (equivalent to power cycle)
 	err = PSUcomms.Reset()
 	if err != nil {
 		fmt.Println(err)
@@ -98,5 +104,16 @@ func main() {
 		fmt.Println(err)
 	} else {
 		fmt.Printf("%v RCOMP calibration value = %v\n", PSUcomms.String(), compensation)
+	}
+
+	// Example of changing a default value in device driver.
+	max17040.DefaultOpts.MaxRComp = 12000 // Reduce maximum threshold.
+	fmt.Printf("Maximum threshold for RCOMP now changed to %v\n", max17040.DefaultOpts.MaxRComp)
+
+	err = PSUcomms.SetRCOMP(newRCOMP) // Attempt to change RCOMP above threshold.
+	if err != nil {
+		fmt.Printf("Failed to set RCOMP. %v\n", err)
+	} else {
+		fmt.Printf("RCOMP value successfully changed to %v\n", newRCOMP)
 	}
 }

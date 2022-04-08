@@ -98,6 +98,22 @@ func (d *Dev) Reset() (err error) {
 	return nil
 }
 
+func (d *Dev) QuickStart() (err error) {
+	// Lock device to inhibit attempts at multiple simultaneous read/writes.
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	bufReset := make([]byte, 2)
+	binary.BigEndian.PutUint16(bufReset, DefaultOpts.Mode) // Encode Quickstart mode (Default)
+	bufReset = append([]byte{Mode}, bufReset...)           // Prepend bufReset slice with the Mode register address
+
+	if err := d.c.Tx(bufReset, nil); err != nil {
+		err = fmt.Errorf("failed to assert mode for ("+d.name+") device. %w", err) // prepend error with additional debug information
+		return err
+	}
+	return nil
+}
+
 // Write RCOMP calibration value.
 // Note value is volatile and will revert to default on power cycle or reset.
 func (d *Dev) SetRCOMP(rcompVal int) (err error) {
