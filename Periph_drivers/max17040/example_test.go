@@ -9,7 +9,7 @@ import (
 	"periph.io/x/host/v3"
 )
 
-func main() {
+func Example() {
 	// Initialize periph.io.
 	if _, err := host.Init(); err != nil {
 		fmt.Println("Error: Unable to initialize Periph.io library")
