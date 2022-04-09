@@ -3,7 +3,7 @@ package max17040_test
 import (
 	"fmt"
 
-	"main.go/max17040" // Update with alternative resource location
+	"main.go/max17040" // Update with alternative resource location.
 
 	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/host/v3"
@@ -32,7 +32,7 @@ func Example() {
 	}
 
 	// Get Cell DC Voltage measurement.
-	dcVoltage, err := PSUcomms.ReadCellVoltage() // Fetch the presently measured DC UPS voltage
+	dcVoltage, err := PSUcomms.ReadCellVoltage() // Fetch the presently measured DC UPS voltage.
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -58,7 +58,7 @@ func Example() {
 		fmt.Printf("Version of this MAX17040: %v\n", version)
 	}
 
-	// Initiate Quickstart Mode (clears algorithm to same state as a power up)
+	// Initiate Quickstart Mode (clears algorithm to same state as a power up).
 	err = PSUcomms.QuickStart()
 	if err != nil {
 		fmt.Println(err)

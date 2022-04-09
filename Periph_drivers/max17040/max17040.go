@@ -50,8 +50,8 @@ type Opts struct {
 	Command    uint16                   // Command register setting.
 	MinRComp   int                      // Minimum RCOMP calibration value.
 	MaxRComp   int                      // Maximum RCOMP calibration value.
-	MaxVolts   physic.ElectricPotential // Maximum voltage threshold
-	MinVolts   physic.ElectricPotential // Minimum voltage threshold
+	MaxVolts   physic.ElectricPotential // Maximum voltage threshold.
+	MinVolts   physic.ElectricPotential // Minimum voltage threshold.
 }
 
 // DefaultOpts are the recommended default options.
@@ -88,33 +88,34 @@ func (d *Dev) Reset() (err error) {
 	defer d.mu.Unlock()
 
 	bufReset := make([]byte, 2)
-	binary.BigEndian.PutUint16(bufReset, DefaultOpts.Command) // Encode Reset command
-	bufReset = append([]byte{Command}, bufReset...)           // Prepend bufReset slice with the Command register address
+	binary.BigEndian.PutUint16(bufReset, DefaultOpts.Command) // Encode reset command.
+	bufReset = append([]byte{Command}, bufReset...)           // Prepend bufReset slice with the Command register address.
 
 	if err := d.c.Tx(bufReset, nil); err != nil {
-		err = fmt.Errorf("failed to reset ("+d.name+") device. %w", err) // prepend error with additional debug information
+		err = fmt.Errorf("failed to reset ("+d.name+") device. %w", err) // prepend error with additional debug information.
 		return err
 	}
 	return nil
 }
 
+// QuickStart reboots the (State of Charge) alogrithm without resetting device
 func (d *Dev) QuickStart() (err error) {
 	// Lock device to inhibit attempts at multiple simultaneous read/writes.
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
 	bufReset := make([]byte, 2)
-	binary.BigEndian.PutUint16(bufReset, DefaultOpts.Mode) // Encode Quickstart mode (Default)
-	bufReset = append([]byte{Mode}, bufReset...)           // Prepend bufReset slice with the Mode register address
+	binary.BigEndian.PutUint16(bufReset, DefaultOpts.Mode) // Encode Quickstart mode (Default).
+	bufReset = append([]byte{Mode}, bufReset...)           // Prepend bufReset slice with the Mode register address.
 
 	if err := d.c.Tx(bufReset, nil); err != nil {
-		err = fmt.Errorf("failed to assert mode for ("+d.name+") device. %w", err) // prepend error with additional debug information
+		err = fmt.Errorf("failed to assert mode for ("+d.name+") device. %w", err) // prepend error with additional debug information.
 		return err
 	}
 	return nil
 }
 
-// Write RCOMP calibration value.
+//  SetRCOMP writes new RCOMP calibration value.
 // Note value is volatile and will revert to default on power cycle or reset.
 func (d *Dev) SetRCOMP(rcompVal int) (err error) {
 	// Lock device to inhibit attempts at multiple simultaneous read/writes.
@@ -128,8 +129,8 @@ func (d *Dev) SetRCOMP(rcompVal int) (err error) {
 	}
 
 	bufRcomp := make([]byte, 2)
-	binary.BigEndian.PutUint16(bufRcomp, uint16(rcompVal)) // Encode Reset command
-	bufRcomp = append([]byte{RComp}, bufRcomp...)          // Prepend bufReset slice with the RCOMP register address
+	binary.BigEndian.PutUint16(bufRcomp, uint16(rcompVal)) // Encode Reset command.
+	bufRcomp = append([]byte{RComp}, bufRcomp...)          // Prepend bufReset slice with the RCOMP register address.
 
 	if err := d.c.Tx(bufRcomp, nil); err != nil {
 		fmt.Printf("failed to update R-Compensation for "+d.name+". %v\n", err)
@@ -138,7 +139,7 @@ func (d *Dev) SetRCOMP(rcompVal int) (err error) {
 	return nil
 }
 
-// Read RCOMP calibration value.
+// GetRCOMP reads RCOMP calibration value.
 func (d *Dev) GetRCOMP() (rcompVal int, err error) {
 	// Lock device to inhibit attempts at multiple simultaneous read/writes.
 	d.mu.Lock()
@@ -160,32 +161,32 @@ func (d *Dev) GetRCOMP() (rcompVal int, err error) {
 	return rcompVal, nil
 }
 
-// Read Version information
+// GetVersion reads Version information.
 func (d *Dev) GetVersion() (version string, err error) {
 	// Lock device to inhibit attempts at multiple simultaneous read/writes.
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	// Convert byte (ASCII literal) to string
+	// Convert byte (ASCII literal) to string.
 	byteTostring := func(val byte) string {
 		num := int(val)
 		if num < 10 {
-			return "0" + strconv.Itoa(num) // Provide some leading padding as required
+			return "0" + strconv.Itoa(num) // Provide some leading padding as required.
 		}
 		return strconv.Itoa(num)
 	}
 
 	// Read raw (version information) data from device.
 	if err := d.c.Tx([]byte{Version}, data); err != nil {
-		err = fmt.Errorf("failed to fetch "+d.name+" Version. %w", err) // prepend error with additional debug information
+		err = fmt.Errorf("failed to fetch "+d.name+" Version. %w", err) // prepend error with additional debug information.
 		return "", err
 	}
 
-	version = byteTostring(data[0]) + "/" + byteTostring(data[1]) // Convert bytes to string and format accordingly
+	version = byteTostring(data[0]) + "/" + byteTostring(data[1]) // Return formatted string value.
 	return version, nil
 }
 
-// Read DC Voltage of battery backup
+// ReadCellVoltage reads Cell or Battery DC Voltage.
 func (d *Dev) ReadCellVoltage() (voltage physic.ElectricPotential, err error) {
 	// Lock device to inhibit attempts at multiple simultaneous read/writes.
 	d.mu.Lock()
@@ -208,7 +209,7 @@ func (d *Dev) ReadCellVoltage() (voltage physic.ElectricPotential, err error) {
 	return voltage, nil
 }
 
-// ReadSoC() reads State of Charge (Returns Percentage)
+// ReadSoC reads State of Charge (Returns Percentage).
 func (d *Dev) ReadSoC() (SOCpercent float32, err error) {
 	// Lock device to inhibit attempts at multiple simultaneous read/writes.
 	d.mu.Lock()
@@ -219,9 +220,9 @@ func (d *Dev) ReadSoC() (SOCpercent float32, err error) {
 		return 0, err
 	}
 
-	SOCpercent = float32(uint16(data[0])<<8|uint16(data[1])) / 256 //(Calculate State of Charge %)
+	SOCpercent = float32(uint16(data[0])<<8|uint16(data[1])) / 256 //(Calculate State of Charge %).
 
-	// Provide some boundary (sanity) checks on SoC read
+	// Provide some boundary (sanity) checks on SoC read.
 	if (SOCpercent > 100) || (SOCpercent < 0) {
 		err = errors.New("failed to read State of Charge from " + d.name)
 		return 0, err
