@@ -10,8 +10,8 @@ The device driver provides the following I2C facilities for the MAX17040 fuel ga
 * Read cell or battery Voltage (returned as type physic.ElectricPotential)
 * Read State of Charge (Percentage, returned as Float32)
 * Power On Reset command (Identical to a power cycle)
-* Quick-start command for rebooting the (State of Charge) algorithm without initiating a full reset of device
+* Quick-start command for rebooting the (State of Charge) algorithm without initiating a full device reset or power cycle
 * Ability to read IC Version information
 * Read/Write RCOMP calibration value
 
-Refer to the example_test.go file for demonstration code and how to utlize the device driver. This code was tested on a Raspberry Pi 4 running Raspberry Pi OS.
+Refer to the example_test.go file for demonstration code and how to utlize the device driver. This code was tested on a Raspberry Pi 4 running Raspberry Pi OS, with a [geekworm X728 DC UPS](https://wiki.geekworm.com/X728) HAT that incorporates the Maxim IC.
