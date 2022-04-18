@@ -18,7 +18,7 @@ const (
 	ptrConf byte = 1
 )
 
-// Test #1 - Enter/Exit Shutdown Mode
+// Test #1 - Enter Sleep (Shutdown) Mode.
 func TestDev_Shutdown(t *testing.T) {
 	// Prep Mock I2C
 	bus := i2ctest.Playback{
@@ -38,13 +38,13 @@ func TestDev_Shutdown(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = d.Shutdown(true) // Initiate a shutdown
+	err = d.Shutdown(true) // Initiate shutdown.
 	if err != nil {
 		t.Fatal(errors.New("\nshutdown failed. " + err.Error()))
 	}
 }
 
-// Test #2 - Wake from Shutdown (sleep)
+// Test #2 - Wake from Sleep (Shutdown) Mode.
 func TestDev_WakeFromSleep(t *testing.T) {
 	//Prep Mock I2C
 	bus := i2ctest.Playback{
@@ -64,20 +64,20 @@ func TestDev_WakeFromSleep(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = d.Shutdown(false) // Initiate a shutdown
+	err = d.Shutdown(false) // Wake up.
 	if err != nil {
 		t.Fatal(errors.New("\nwake from sleep failed. " + err.Error()))
 	}
 }
 
-// Test #3 - Initiate a single temperature reading
+// Test #3 - Initiate a single temperature reading.
 func TestDev_OneShotTrigger(t *testing.T) {
 	//
 	bus := i2ctest.Playback{
 		Ops: []i2ctest.IO{
 			{
 				Addr: I2CAddr3,             // S-5851A Device address.
-				W:    []byte{ptrConf, 129}, // Expect (write) pointer register points to Config register, set trigger bits)
+				W:    []byte{ptrConf, 129}, // Expect (write) pointer register points to Config register, set trigger bits).
 				R:    []byte{},
 			},
 		},
@@ -90,7 +90,7 @@ func TestDev_OneShotTrigger(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = d.OneShotTrigger() // Trigger a single temperature reading, then sleep
+	err = d.OneShotTrigger() // Trigger a single temperature reading, then sleep.
 	if err != nil {
 		t.Fatal(errors.New("\ntrigger of one shot temperature read failed. " + err.Error()))
 	}
@@ -102,30 +102,30 @@ func TestDev_IsTempDone(t *testing.T) {
 		Ops: []i2ctest.IO{
 			{
 				Addr: I2CAddr3,        // S-5851A Device address.
-				W:    []byte{ptrConf}, // Point to config register
+				W:    []byte{ptrConf}, // Point to config register.
 				R:    []byte{},
 			},
 			{
 				Addr: I2CAddr3,
 				W:    []byte{},
-				R:    []byte{128}, // Read config status (Bit 7 = 1 = still busy)
+				R:    []byte{128}, // Read config status (Bit 7 = 1 = still busy).
 			},
 			{
 				Addr: I2CAddr3,        // S-5851A Device address.
-				W:    []byte{ptrConf}, // Point to config register
+				W:    []byte{ptrConf}, // Point to config register.
 				R:    []byte{},
 			},
 			{
 				Addr: I2CAddr3,
 				W:    []byte{},
-				R:    []byte{127}, // Read config status (Bit 7 = 0 = temperature ready to read)
+				R:    []byte{127}, // Read config status (Bit 7 = 0 = temperature ready to read).
 			},
 		},
 	}
 	defer bus.Close()
 	bus.DontPanic = true
 
-	// Test detection of signal (temperature acquisition still busy)
+	// Test detection of signal (temperature acquisition still busy).
 	d, err := NewS5851A(&bus, &DefaultOpts)
 	if err != nil {
 		t.Fatal(err)
@@ -139,7 +139,7 @@ func TestDev_IsTempDone(t *testing.T) {
 		t.Fatal(errors.New("Failed to receive (temperature acquisition busy) signal"))
 	}
 
-	// Test detection of signal (conversion complete, ready to read)
+	// Test detection of signal (conversion complete, ready to read).
 	isFinished, err = d.IsTempReady()
 	if err != nil {
 		t.Fatal(errors.New("\nfailed to determine config status. " + err.Error()))
@@ -153,18 +153,18 @@ func TestDev_IsTempDone(t *testing.T) {
 // Test #5 - Read Temperature.
 func TestDev_ReadTemperature(t *testing.T) {
 
-	// On startup driver should attempt to reset pointer register
+	// On startup driver should attempt to reset pointer register.
 	bus := i2ctest.Playback{
 		Ops: []i2ctest.IO{
 			{
-				Addr: I2CAddr3,  // S-5851A Device address.    				//DEFAULT ADDRESS IN MAIN DRIVER CODE NEEDS TO BE SET PROPERLY AT END OF THIS DEVELOPMENT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				W:    []byte{0}, // Write pointer reference (back to temperature read register)
+				Addr: I2CAddr3,  // S-5851A Device address.
+				W:    []byte{0}, // Write pointer reference (back to temperature read register).
 				R:    []byte{},
 			},
 			{
-				Addr: I2CAddr3,     // S-5851A Device address.    				//DEFAULT ADDRESS IN MAIN DRIVER CODE NEEDS TO BE SET PROPERLY AT END OF THIS DEVELOPMENT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				W:    []byte{},     // Empty write (S-5851A pointer already points to temperature register)
-				R:    []byte{0, 0}, // Dummy (Don't care) temperature for this test
+				Addr: I2CAddr3,     // S-5851A Device address.
+				W:    []byte{},     // Empty write (S-5851A pointer already points to temperature register).
+				R:    []byte{0, 0}, // Dummy (Don't care) temperature for this test.
 			},
 		},
 	}
@@ -178,20 +178,20 @@ func TestDev_ReadTemperature(t *testing.T) {
 	_, err = d.ReadTemperature()
 
 	if err != nil {
-		t.Fatal(errors.New("\npointer register not initialized. " + err.Error())) // Handle all non-boundary errors
+		t.Fatal(errors.New("\npointer register not initialized. " + err.Error()))
 	}
 
-	bus.Close() // close bus prior to new bus being created for temperature readouts about to follow
+	bus.Close() // close bus prior to new bus being created for temperature readouts about to follow.
 
-	// Variable function tests readout against test temperature
-	// Temperature data-points taken from S-5851 datasheet for ease of use
+	// Variable function tests readout against test temperature.
+	// Temperature data-points taken from S-5851 datasheet for ease of use.
 	checkTemp := func(testTemp physic.Temperature, datH, datL byte) {
 		bus := i2ctest.Playback{
 			Ops: []i2ctest.IO{
 				{
-					Addr: I2CAddr3,           // S-5851A Device address.    				//DEFAULT ADDRESS IN MAIN DRIVER CODE NEEDS TO BE SET PROPERLY AT END OF THIS DEVELOPMENT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-					W:    []byte{},           // Empty write (S-5851A pointer already points to temperature register)
-					R:    []byte{datH, datL}, // Read temperature
+					Addr: I2CAddr3,           // S-5851A Device address.
+					W:    []byte{},           // Empty write (S-5851A pointer already points to temperature register).
+					R:    []byte{datH, datL}, // Read temperature.
 				},
 			},
 		}
@@ -206,20 +206,21 @@ func TestDev_ReadTemperature(t *testing.T) {
 
 		Temperature, err := d.ReadTemperature()
 
-		strError := "" // Manage slices of error strings
+		strError := "" // Manage slices of error strings.
 		if err != nil {
 			if len(err.Error()) >= 25 {
-				strError = strings.Clone(err.Error()[:25]) // Make physical copy of error substring (not reference!)
+				strError = strings.Clone(err.Error()[:25]) // Make physical copy of error substring (not reference!).
 			}
 
-			// Detect temperature boundary has been exceeded and validly detected (mask this valid error)
+			// Detect temperature boundary has been exceeded and validly detected (mask this valid error).
 			if strError != "temperature out of bounds" {
 				t.Fatal(err) // Handle all non-boundary errors
 			} else if Temperature > minimumTemp && Temperature < maximumTemp {
 				t.Fatal(errors.New("\nTemperature incorrectly determined to be out of bounds"))
 			}
 		}
-		if strError != "temperature out of bounds" && ((Temperature < minimumTemp) || (Temperature > maximumTemp)) { // Detect if temperature boundary has been exceeded but not detected
+		// Detect if temperature boundary has been exceeded but not detected.
+		if strError != "temperature out of bounds" && ((Temperature < minimumTemp) || (Temperature > maximumTemp)) {
 			t.Fatal(errors.New("\nTemperature bounds trap failed to detect temperature out of range (" + Temperature.String() + ")"))
 		}
 
@@ -227,13 +228,12 @@ func TestDev_ReadTemperature(t *testing.T) {
 
 		// Verify measured temperature is the expected temperature (Boundary violations are masked to eliminate false reads)
 		if Temperature != exptectedT && strError != "temperature out of bounds" {
-			//	fmt.Println(strError)
 			t.Fatalf("\nReadTemperature() function test failed. Received %v, expected %v", Temperature, exptectedT)
 		}
 	}
 
 	// Test range of temperatures (in milliCelcius)
-	checkTemp(127000, 0x7f, 0x00) // 127°C (Test Upper bound)
+	checkTemp(127000, 0x7f, 0x00) // 127°C (Test Upper bound).
 	checkTemp(100000, 0x64, 0x00) // 100°C
 	checkTemp(75000, 0x4b, 0x00)  // 75°C
 	checkTemp(25000, 0x19, 0x00)  // 25°C
@@ -242,7 +242,7 @@ func TestDev_ReadTemperature(t *testing.T) {
 	checkTemp(-250, 0xff, 0xc0)   // -0.25°C
 	checkTemp(-25000, 0xe7, 0x00) // -25°C
 	checkTemp(-35000, 0xdd, 0x00) // -35°C
-	checkTemp(-47000, 0xd1, 0x00) // -47°C (Test Lower bound)
+	checkTemp(-47000, 0xd1, 0x00) // -47°C (Test Lower bound).
 }
 
 // Test #6 - String and Halt functions.
