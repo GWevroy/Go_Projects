@@ -24,7 +24,7 @@ func TestDev_Shutdown(t *testing.T) {
 	bus := i2ctest.Playback{
 		Ops: []i2ctest.IO{
 			{
-				Addr: I2CAddr3,           // S-5851A Device address.
+				Addr: I2CAddr1,           // S-5851A Device address.
 				W:    []byte{ptrConf, 1}, // Expect (write) pointer register points to Config register, set shutdown bit)
 				R:    []byte{},
 			},
@@ -50,7 +50,7 @@ func TestDev_WakeFromSleep(t *testing.T) {
 	bus := i2ctest.Playback{
 		Ops: []i2ctest.IO{
 			{
-				Addr: I2CAddr3,           // S-5851A Device address.
+				Addr: I2CAddr1,           // S-5851A Device address.
 				W:    []byte{ptrConf, 0}, // Expect (write) pointer register points to Config register, clear shutdown bit)
 				R:    []byte{},
 			},
@@ -76,7 +76,7 @@ func TestDev_OneShotTrigger(t *testing.T) {
 	bus := i2ctest.Playback{
 		Ops: []i2ctest.IO{
 			{
-				Addr: I2CAddr3,             // S-5851A Device address.
+				Addr: I2CAddr1,             // S-5851A Device address.
 				W:    []byte{ptrConf, 129}, // Expect (write) pointer register points to Config register, set trigger bits).
 				R:    []byte{},
 			},
@@ -101,22 +101,22 @@ func TestDev_IsTempDone(t *testing.T) {
 	bus := i2ctest.Playback{
 		Ops: []i2ctest.IO{
 			{
-				Addr: I2CAddr3,        // S-5851A Device address.
+				Addr: I2CAddr1,        // S-5851A Device address.
 				W:    []byte{ptrConf}, // Point to config register.
 				R:    []byte{},
 			},
 			{
-				Addr: I2CAddr3,
+				Addr: I2CAddr1,
 				W:    []byte{},
 				R:    []byte{128}, // Read config status (Bit 7 = 1 = still busy).
 			},
 			{
-				Addr: I2CAddr3,        // S-5851A Device address.
+				Addr: I2CAddr1,        // S-5851A Device address.
 				W:    []byte{ptrConf}, // Point to config register.
 				R:    []byte{},
 			},
 			{
-				Addr: I2CAddr3,
+				Addr: I2CAddr1,
 				W:    []byte{},
 				R:    []byte{127}, // Read config status (Bit 7 = 0 = temperature ready to read).
 			},
@@ -157,12 +157,12 @@ func TestDev_ReadTemperature(t *testing.T) {
 	bus := i2ctest.Playback{
 		Ops: []i2ctest.IO{
 			{
-				Addr: I2CAddr3,  // S-5851A Device address.
+				Addr: I2CAddr1,  // S-5851A Device address.
 				W:    []byte{0}, // Write pointer reference (back to temperature read register).
 				R:    []byte{},
 			},
 			{
-				Addr: I2CAddr3,     // S-5851A Device address.
+				Addr: I2CAddr1,     // S-5851A Device address.
 				W:    []byte{},     // Empty write (S-5851A pointer already points to temperature register).
 				R:    []byte{0, 0}, // Dummy (Don't care) temperature for this test.
 			},
@@ -189,7 +189,7 @@ func TestDev_ReadTemperature(t *testing.T) {
 		bus := i2ctest.Playback{
 			Ops: []i2ctest.IO{
 				{
-					Addr: I2CAddr3,           // S-5851A Device address.
+					Addr: I2CAddr1,           // S-5851A Device address.
 					W:    []byte{},           // Empty write (S-5851A pointer already points to temperature register).
 					R:    []byte{datH, datL}, // Read temperature.
 				},
