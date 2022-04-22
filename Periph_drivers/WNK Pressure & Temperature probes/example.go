@@ -31,9 +31,9 @@ func Example() {
 	// Create handle to WNK Transducer (pressure/temperature) device.
 	// Example user settings:
 	// Pressure range = 0 - 100kPa = 100kPa
-	// Min Pressure (fatal error if exceeded) = -35kPa
+	// Min Pressure (fatal error if exceeded) = -10kPa
 	// Max Pressure (fatal error if exceeded) = 150kPa
-	devTemp, err := wnk.NewSensorWNK(100, -35, 150, bus, &wnk.DefaultOpts)
+	devTemp, err := wnk.NewSensorWNK(100, -10, 150, bus, &wnk.DefaultOpts)
 	if err != nil {
 		fmt.Println("Error: Failed to configure device comms.")
 		log.Fatalln(err)
@@ -52,37 +52,3 @@ func Example() {
 		time.Sleep(500 * time.Millisecond) // Arbitrary delay between reads.
 	}
 }
-
-// // *******************
-// // * Pressure Sensor *
-// // *******************
-// func pressure(botPressureI2C *i2c.I2C) {
-// 	var snPressure float64
-
-// 	kPaDat, _, err := botPressureI2C.ReadRegBytes(0x06, 3)
-// 	if err != nil {
-// 		if appConfig.Conf.IsVerbose {
-// 			fmt.Println("Error: Failed to communicate with pressure sensor")
-// 			fmt.Println(err)
-// 		}
-// 		return
-// 	} else if appConfig.Conf.IsVerbose {
-// 		fmt.Println("Info: Read request made successfully to pressure sensor")
-// 	}
-
-// 	tmpkPa := uint32(kPaDat[0])<<16 | uint32(kPaDat[1])<<8 | uint32(kPaDat[2]) // Big Endian (left shift MSB) integer created from bytes.
-// 	if (tmpkPa & 0x800000) != 0 {
-// 		snPressure = float64(tmpkPa) - 16777216.0 // Adjust for negative (sensed) pressure if applicable.
-// 	} else {
-// 		snPressure = float64(tmpkPa)
-// 	}
-// 	snPressure = 3.3 * snPressure / 8388608
-// 	snPressure = kpaRange * (snPressure - 0.5) / 2
-
-// 	snPressure = (snPressure * appConfig.Conf.Pres1_Gain) + appConfig.Conf.Pres1_Offset // Apply calibration settings.
-
-// 	if !appConfig.Conf.IsMute {
-// 		fmt.Printf("Pressure is %.3fkPa \n", snPressure)
-// 	}
-// 	botPressure.Set(snPressure) // Save tank bottom pressure sensor reading to database.
-// }
