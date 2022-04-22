@@ -18,11 +18,7 @@ import (
 
 // Device driver constants.
 const (
-	I2CAddr uint16 = 0x6d // I2CAddr1 is the default I2C device address for the WNK pressure/temperature transducer series.
-
-	//maximumPres physic.Pressure = 120 * physic.KiloPascal // Maximum anticipated pressure (Upper error detection bound).
-	//minimumPres physic.Pressure = -35 * physic.KiloPascal // Minimum anticipated pressure (Lower error detection bound).
-
+	I2CAddr     uint16             = 0x6d // I2CAddr1 is the default I2C device address for the WNK pressure/temperature transducer series.
 	regPressure byte               = 0x06 // Transducer Pressure (read) register
 	regTemp     byte               = 0x09 // Transducer Temperature (read) register
 	maxTemp     physic.Temperature = 125  // Default Maximum temperature
