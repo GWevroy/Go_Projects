@@ -15,9 +15,11 @@ The periph.io compatible device driver provides the following sensor (I2C) commu
 This driver has been hardware tested with a (WNK805 100kPa) pressure sensor only. Although the facility for temperature sensing has been included, and validated in software unit tests, the temperature sensing function has yet to be tested on physical hardware. It should work as expected, however message me (the author) should you incur any problems in its implementation.
 
 The same constructor is used regardless of probe type (temperature, pressure, or both). If the physical probe is exclusively temperature, simply pass in a value of 0 for all respective pressure arguments in the constructor
+
 Example: **probeT, err := NewSensorWNK(0, 0, 0, &bus, &DefaultOpts)**
 
 For either a pressure probe or combination pressure/temperature probe, include the pressure related arguments in the constructor. In the following example, a probe is specified with a 0-100kPa range, a minimum pressure limit of -20kPa, and a maximum pressure limit of 200kPa. The minimum pressure should not be lower than -24kPa, as this is unneccessary and incalculable.
+
 Example: **probeTP, err := NewSensorWNK(100, -20, 200, &bus, &DefaultOpts)**
 
 It is important that the pressure limits are well outside the expected realistic range of the probe, as they do not serve to detect abnormal pressure levels. Instead they provide a means to detect abnormal probe behaviour (malfunction) and/or noisy communications. This detection is provided as a minimum level of protection by the device driver, however the user may wish to further enhance such protective measures, depending on their application.
