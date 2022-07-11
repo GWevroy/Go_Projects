@@ -26,7 +26,7 @@ const (
 	TempRegister byte   = 0x09 // Transducer Temperature (read) register
 )
 
-// Test # - Read Temperature.
+// Test #1 - Read Temperature.
 func TestDev_Temperature(t *testing.T) {
 	// Variable function tests readout against test temperature.
 	checkTemp := func(testTemp physic.Temperature, datH, datM, datL byte) {
@@ -91,7 +91,7 @@ func TestDev_Temperature(t *testing.T) {
 	checkTemp(-27530, 203, 120, 81) // -27.53°C (Test Lower bound).
 }
 
-// Test # - Read Pressure.
+// Test #2 - Read Pressure.
 func TestDev_Pressure(t *testing.T) {
 	// Variable function tests readout against test pressure.
 	checkPres := func(testPres physic.Pressure, datH, datM, datL byte) {
@@ -158,7 +158,7 @@ func TestDev_Pressure(t *testing.T) {
 	checkPres(-20000, 3, 224, 247)   // -20kPa  (Test Lower bound).
 }
 
-// Test #6 - String and Halt functions.
+// Test #3 - String and Halt functions.
 func TestDev_String(t *testing.T) {
 	bus := i2ctest.Playback{}
 	defer bus.Close()
